@@ -1,0 +1,10 @@
+git+https://github.com/abcd-EGH/facenet-pytorch.git
+# deepface==0.0.93
+insightface==0.7.3
+onnxruntime-gpu==1.21.0
+opencv-python==4.11.0.86
+pandas==2.2.3
+--extra-index-url https://download.pytorch.org/whl/cu124
+torch==2.6.0+cu124
+--extra-index-url https://download.pytorch.org/whl/cu124
+torchvision==0.21.0+cu124
