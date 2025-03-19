@@ -4,9 +4,10 @@ import torch
 from torch.utils.data import DataLoader
 from models.multitask import MultiTaskHead
 from models.base_multitask import BaseMultiTaskHead
+from models.transformer import TransformerMultiTaskHead
 from data.dataset import FairFaceDataset
 from utils.face_utils import train_model, AGE_CLASSES, GENDER_CLASSES, RACE_CLASSES
-from config.config import DATA_ROOT, TRAIN_CSV, VAL_CSV, EPOCHS, BATCH_SIZE, LEARNING_RATE, MAX_SAMPLES, DROPOUT_P, INPUT_DIM, SHARED_DIM, HIDDEN_DIM
+from config.config import DATA_ROOT, TRAIN_CSV, VAL_CSV, EPOCHS, BATCH_SIZE, LEARNING_RATE, MAX_SAMPLES, DROPOUT_P, INPUT_DIM, SHARED_DIM, HIDDEN_DIM, EMBED_DIM, NUM_HEADS, NUM_LAYERS, MODEL_TYPE
 
 def main():
     parser = argparse.ArgumentParser(description="FairFace 멀티태스크 모델 학습")
@@ -18,19 +19,39 @@ def main():
     parser.add_argument("--learning_rate", type=float, default=LEARNING_RATE, help="학습률")
     parser.add_argument("--max_samples", type=int, default=MAX_SAMPLES, help="사용할 이미지 최대 개수 (None이면 전체 사용)")
     parser.add_argument("--dropout_p", type=float, default=DROPOUT_P, help="Dropout 확률")
+    parser.add_argument("--model_type", type=str, default=MODEL_TYPE, help="모델 타입 (base, shared, transformer)")
     args = parser.parse_args()
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
-    model = MultiTaskHead(
-        input_dim=INPUT_DIM,
-        shared_dim=SHARED_DIM,
-        hidden_dim=HIDDEN_DIM,
-        num_age=len(AGE_CLASSES),
-        num_gender=len(GENDER_CLASSES),
-        num_race=len(RACE_CLASSES),
-        dropout_p=args.dropout_p
-    )
+    if args.model_type == "base":
+        model = BaseMultiTaskHead(
+            input_dim=INPUT_DIM,
+            hidden_dim=HIDDEN_DIM,
+            num_age=len(AGE_CLASSES),
+            num_gender=len(GENDER_CLASSES),
+            num_race=len(RACE_CLASSES),
+        )
+    elif args.model_type == "shared":
+        model = MultiTaskHead(
+            input_dim=INPUT_DIM,
+            shared_dim=SHARED_DIM,
+            hidden_dim=HIDDEN_DIM,
+            num_age=len(AGE_CLASSES),
+            num_gender=len(GENDER_CLASSES),
+            num_race=len(RACE_CLASSES),
+            dropout_p=args.dropout_p
+        )
+    elif args.model_type == "transformer":
+        model = TransformerMultiTaskHead(
+            input_dim=INPUT_DIM,
+            embed_dim=EMBED_DIM, # Transformer 입력 차원
+            hidden_dim=HIDDEN_DIM, # Feed-forward 내부 차원
+            num_heads=NUM_HEADS, # attention head 개수
+            num_layers=NUM_LAYERS,
+            num_age=len(AGE_CLASSES),
+            num_gender=len(GENDER_CLASSES),
+            num_race=len(RACE_CLASSES),
+        )
     
     train_dataset = FairFaceDataset(csv_path=args.train_csv, images_root=args.train_img_root, max_samples=args.max_samples)
     val_dataset = FairFaceDataset(csv_path=args.val_csv, images_root=args.train_img_root, max_samples=args.max_samples)
@@ -42,4 +63,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # python train.py --batch_size 256 --learning_rate 3e-4 --max_samples 1000
+    # python train.py --batch_size 256 --learning_rate 1e-4 --max_samples 1000 --model_type transformer
