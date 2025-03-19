@@ -8,7 +8,7 @@ TEST_IMAGE = "test_img/winter4.jpg"
 
 # 모델 관련 경로
 WEIGHTS_DIR = "weights"
-MODEL_FILENAME = "arcface_multitask_head.pth"
+MODEL_FILENAME = "multitask_head.pth"
 MODEL_PATH = os.path.join(WEIGHTS_DIR, MODEL_FILENAME)
 
 # 결과 및 검출된 얼굴 이미지 저장 폴더
