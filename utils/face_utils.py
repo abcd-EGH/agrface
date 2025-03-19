@@ -10,7 +10,7 @@ import torch.optim as optim
 from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
 from facenet_pytorch import MTCNN
-from config.config import DETECTED_FACES_DIR, RESULTS_DIR, MODEL_PATH
+from config.config import DETECTED_FACES_DIR, RESULTS_DIR, MODEL_PATH, INPUT_DIM
 
 # 라벨 매핑
 AGE_CLASSES = ["0-2", "3-9", "10-19", "20-29", "30-39", "40-49", "50-59", "60-69", "more than 70"]
@@ -27,7 +27,7 @@ arcface_model.prepare(ctx_id=0)
 
 def get_embedding(image_path):
     """
-    ArcFace를 사용하여 이미지에서 512차원의 임베딩을 추출합니다.
+    ArcFace를 사용하여 이미지에서 INPUT_DIM차원의 임베딩을 추출합니다.
     """
     img = cv2.imread(image_path)
     faces = arcface_model.get_feat(img)
@@ -36,7 +36,7 @@ def get_embedding(image_path):
         return torch.tensor(embedding, dtype=torch.float32)
     else:
         print(f"얼굴 검출 실패: {image_path}")
-        return torch.zeros(512, dtype=torch.float32)
+        return torch.zeros(INPUT_DIM, dtype=torch.float32)
 
 def crop_and_save_face(image_path, facial_area, save_folder=DETECTED_FACES_DIR):
     """
@@ -97,9 +97,9 @@ def train_model(model, train_loader, val_loader, device, epochs=10, learning_rat
                 gender_labels = batch["gender"].to(device)
                 race_labels = batch["race"].to(device)
                 logits_age, logits_gender, logits_race = model(embeddings)
-                loss = (criterion(logits_age, age_labels) +
-                        criterion(logits_gender, gender_labels) +
-                        criterion(logits_race, race_labels))
+                loss = (criterion(logits_age, age_labels) * 0.9 +
+                        criterion(logits_gender, gender_labels) * 1.2 +
+                        criterion(logits_race, race_labels) * 0.9)
                 val_loss += loss.item()
         avg_val_loss = val_loss / len(val_loader)
         
@@ -154,7 +154,7 @@ def inference(model, image_path, device):
             embedding = faces_arc[0]
         else:
             print("ArcFace 임베딩 추출 실패 (crop된 얼굴).")
-            embedding = np.zeros(512)
+            embedding = np.zeros(INPUT_DIM)
     else:
         print("MTCNN을 통한 얼굴 검출 실패:", image_path)
         return None

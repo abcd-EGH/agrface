@@ -3,7 +3,7 @@ import argparse
 import torch
 from models.multitask import MultiTaskHead
 from utils.face_utils import inference, AGE_CLASSES, GENDER_CLASSES, RACE_CLASSES
-from config.config import TEST_IMAGE, MODEL_PATH
+from config.config import TEST_IMAGE, MODEL_PATH, INPUT_DIM, SHARED_DIM, HIDDEN_DIM
 
 def main():
     parser = argparse.ArgumentParser(description="FairFace 멀티태스크 모델 추론")
@@ -14,11 +14,12 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     model = MultiTaskHead(
-        input_dim=512,
-        hidden_dim=64,
+        input_dim=INPUT_DIM,
+        shared_dim=SHARED_DIM,
+        hidden_dim=HIDDEN_DIM,
         num_age=len(AGE_CLASSES),
         num_gender=len(GENDER_CLASSES),
-        num_race=len(RACE_CLASSES)
+        num_race=len(RACE_CLASSES),
     )
     
     if os.path.exists(args.model_path):
