@@ -33,5 +33,5 @@ python inference.py --test_image test_img/winter4.jpg
 ```
 
 To-do
-[ ] test_img 라이브러리에 있는 모든 test image에 대해 추론 수행
-[ ] 추론 결과를 csv 파일로 results 폴더에 저장
+- [ ] test_img 라이브러리에 있는 모든 test image에 대해 추론 수행
+- [ ] 추론 결과를 csv 파일로 results 폴더에 저장
