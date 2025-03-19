@@ -35,4 +35,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # python inference.py --model_path weights/arcface_multitask_head.pth --test_image test_img/winter4.jpg
+    # python inference.py --model_path weights/multitask_head.pth --test_image test_img/winter4.jpg
